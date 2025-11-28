@@ -1,0 +1,194 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Store {
+  id          String   @id @default(cuid())
+  storeId     String   @unique // Unique identifier for the store (subdomain/slug)
+  name        String
+  description String?
+  
+  // Branding
+  logoUrl     String?
+  faviconUrl  String?
+  bannerUrl   String?
+  
+  // Colors & Theme
+  primaryColor    String   @default("#3B82F6") // Blue-600
+  secondaryColor  String   @default("#1F2937") // Gray-800
+  accentColor     String   @default("#10B981") // Green-500
+  backgroundColor String   @default("#FFFFFF")
+  textColor       String   @default("#111827") // black
+  
+  // Contact Information
+  email       String?
+  phone       String?
+  address     String?
+  city        String?
+  department  String?
+  country     String   @default("Colombia")
+  
+  // Business Information
+  businessType    String? // "individual", "company", "sas", etc.
+  taxId          String? // NIT or RUT
+  businessName   String?
+  
+  // Social Media
+  facebookUrl    String?
+  instagramUrl   String?
+  twitterUrl     String?
+  youtubeUrl     String?
+  tiktokUrl      String?
+  whatsappNumber String?
+  
+  // Store Settings
+  currency        String   @default("COP")
+  language        String   @default("es")
+  timezone        String   @default("America/Bogota")
+  isActive        Boolean  @default(true)
+  maintenanceMode Boolean  @default(false)
+  
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  metaKeywords    String?
+  
+  // Payment Configuration
+  mercadoPagoEnabled Boolean @default(false)
+  mercadoPagoPublicKey String?
+  wompiEnabled       Boolean @default(false)
+  wompiPublicKey     String?
+  ePaycoEnabled      Boolean @default(false)
+  ePaycoPublicKey    String?
+  
+  // Shipping Configuration
+  freeShippingThreshold Float  @default(150000) // 150,000 COP
+  standardShippingCost  Float  @default(15000)  // 15,000 COP
+  expressShippingCost   Float? 
+  
+  // Tax Configuration
+  taxRate         Float  @default(0.19) // 19% IVA Colombia
+  includeTaxInPrice Boolean @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  users    User[]
+  products Product[]
+  orders   Order[]
+
+  @@map("stores")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Store relationship
+  storeId String?
+  store   Store?  @relation(fields: [storeId], references: [id])
+
+  addresses Address[]
+  orders    Order[]
+
+  @@map("users")
+}
+
+model Address {
+  id         String  @id @default(cuid())
+  name       String
+  street     String
+  city       String
+  department String
+  postalCode String
+  phone      String
+  isDefault  Boolean @default(false)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  orders Order[]
+
+  @@map("addresses")
+}
+
+model Product {
+  id          String  @id @default(cuid())
+  name        String
+  description String
+  price       Float
+  category    String
+  images      String[]
+  inStock     Boolean @default(true)
+  stock       Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Store relationship
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id])
+
+  orderItems OrderItem[]
+
+  @@map("products")
+}
+
+model Order {
+  id        String      @id @default(cuid())
+  status    OrderStatus @default(PENDING)
+  total     Float
+  subtotal  Float
+  tax       Float
+  shipping  Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Store relationship
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id])
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  addressId String
+  address   Address  @relation(fields: [addressId], references: [id])
+
+  items OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id       String @id @default(cuid())
+  quantity Int
+  price    Float
+
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}

@@ -1,0 +1,11 @@
+
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" fill="none"/>
+  <!-- Esquinas en L -->
+  <path d="M30 70 V30 H70" stroke="#06B6D4" stroke-width="10" stroke-linecap="round"/>
+  <path d="M130 30 H170 V70" stroke="#ee4b2b" stroke-width="10" stroke-linecap="round"/>
+  <path d="M30 130 V170 H70" stroke="#facc15" stroke-width="10" stroke-linecap="round"/>
+  <path d="M170 130 V170 H130" stroke="#10B981" stroke-width="10" stroke-linecap="round"/>
+  <!-- Letra E blanca -->
+  <text x="100" y="125" font-family="Roboto, sans-serif" font-size="80" fill="white" font-weight="bold" text-anchor="middle">E</text>
+</svg>
